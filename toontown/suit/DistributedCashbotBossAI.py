@@ -206,7 +206,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
             return
         treasure = self.treasures.get(treasureId)
         if treasure:
-            if treasure.validAvatar(av):
+            if treasure.validAvatar(av, boss=True):
                 del self.treasures[treasureId]
                 treasure.d_setGrab(avId)
                 self.grabbingTreasures[treasureId] = treasure

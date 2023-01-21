@@ -191,6 +191,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         self.wateringCan = 0
         self.wateringCanSkill = 0
         self.hatePets = 1
+        self.treasureCount = 0
         self.golfHistory = None
         self.golfHoleBest = None
         self.golfCourseBest = None
@@ -2576,6 +2577,22 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
 
     def isToonedUp(self):
         return self.hp >= self.maxHp
+
+    def incrementTreasureCount(self):
+        newCount = self.treasureCount + 1
+        if newCount % 10 == 0 and newCount <= 30:
+            newMaxHp = self.getMaxHp() + 1
+            self.b_setMaxHp(newMaxHp)
+            self.toonUp(newMaxHp)
+
+        self.b_setTreasureCount(newCount)
+
+    def b_setTreasureCount(self, treasures):
+        self.treasureCount = treasures
+        self.d_setTreasureCount(treasures)
+
+    def d_setTreasureCount(self, treasures):
+        self.sendUpdate('setTreasureCount', [treasures])
 
     def makeBlackCat(self):
         if self.dna.getAnimal() != 'cat':

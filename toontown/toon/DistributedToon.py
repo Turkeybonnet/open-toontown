@@ -172,6 +172,7 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
         self.wateringCanSkill = 0
         self.wateringCanModel = None
         self.gardenSpecials = []
+        self.treasureCount = 0
         self.unlimitedSwing = 0
         self.soundSequenceList = []
         self.boardingParty = None
@@ -2522,6 +2523,9 @@ class DistributedToon(DistributedPlayer.DistributedPlayer, Toon.Toon, Distribute
                 self.hpText.setPos(0, 0, self.height / 2)
                 self.hpTextSeq = Sequence(self.hpText.posInterval(1.0, Point3(0, 0, self.height + 1.5), blendType='easeOut'), Wait(0.85), self.hpText.colorInterval(0.1, Vec4(r, g, b, 0)), Func(self.hideHpText))
                 self.hpTextSeq.start()
+
+    def setTreasureCount(self, treasures):
+        self.treasureCount = treasures
 
     def setName(self, name = 'unknownDistributedAvatar'):
         DistributedPlayer.DistributedPlayer.setName(self, name)
