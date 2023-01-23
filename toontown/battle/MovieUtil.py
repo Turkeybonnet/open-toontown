@@ -144,6 +144,20 @@ def getScaleIntervals(props, duration, startScale, endScale):
 
     return tracks
 
+def getPosIntervals(props, duration, endPos):
+    tracks = Parallel()
+    for prop in props:
+        tracks.append(LerpPosInterval(prop, duration, endPos))
+
+    return tracks
+
+def getHprIntervals(props, duration, endHpr):
+    tracks = Parallel()
+    for prop in props:
+        tracks.append(LerpHprInterval(prop, duration, endHpr))
+
+    return tracks
+
 
 def avatarFacePoint(av, other = render):
     pnt = av.getPos(other)

@@ -37,7 +37,7 @@ def doHeals(heals, hasInteractivePropHealBonus):
 def __doHealLevel(heal, hasInteractivePropHealBonus):
     level = heal['level']
     if level == 0:
-        return __healTickle(heal, hasInteractivePropHealBonus)
+        return __healCanned(heal, hasInteractivePropHealBonus)
     elif level == 1:
         return __healJoke(heal, hasInteractivePropHealBonus)
     elif level == 2:
@@ -122,6 +122,46 @@ def __getSoundTrack(level, delay, duration = None, node = None):
         soundIntervals.append(playSound)
     return soundIntervals
 
+def __healCanned(heal, hasInteractivePropHealBonus):
+    toon = heal['toon']
+    target = heal['target']['toon']
+    level = heal['level']
+    hp = heal['target']['hp']
+    ineffective = heal['sidestep']
+    track = Sequence(__runToHealSpot(heal))
+    can = globalPropPool.getProp('canned-laughter')
+    can2 = MovieUtil.copyProp(can)
+    cans = [can, can2]
+    leftHands = toon.getLeftHands()
+    dScale = 0.5
+    canOpenTrack = Sequence(Func(MovieUtil.showProps, cans, leftHands), MovieUtil.getScaleIntervals(cans, dScale, MovieUtil.PNT3_NEARZERO, Point3(0.25, 0.25, 0.25)))
+    snake = globalPropPool.getProp('canned-laughter-snake')
+    dScale = 0.1
+    dThrow = 0.3
+    dThrowWait = 0.6
+
+    def getCanPos(toon=toon):
+        toon.pose('applause', 28)
+        toon.update(0)
+        hand = toon.getLeftHands()[0]
+        return hand.getPos(render)
+
+    snakeTrack = Sequence(Wait(dThrowWait), Func(MovieUtil.showProp, snake, render, getCanPos), Func(snake.lookAt, Point3(target.getPos() + Point3(0, 0, target.getHeight()))), Func(snake.setHpr, Point3(snake.getHpr() + Point3(0, 90, 0))), LerpScaleInterval(snake, dScale, Point3(1, 1, 1), startScale=MovieUtil.PNT3_NEARZERO), LerpPosInterval(snake, dThrow, Point3(target.getPos() + Point3(0, 0, target.getHeight()))), Func(MovieUtil.removeProp, snake))
+
+    def reparentCans(parent=render):
+        for can in cans:
+            can.reparentTo(parent)
+            hand = toon.getLeftHands()[0]
+            can.setPos(hand.getPos(render))
+
+    durSlip = 0.5
+
+    throwCanTrack = Sequence(Wait(dThrowWait), Func(toon.blinkEyes), Parallel(Func(toon.surpriseEyes), Func(toon.hideAngryMuzzle), ActorInterval(toon, 'slip-backward'), Func(reparentCans, render), MovieUtil.getHprIntervals(cans, durSlip-0.1, Point3(360, 90, 0)), MovieUtil.getPosIntervals(cans, durSlip, Point3(toon.getPos() + Point3(-0.6, 0.25, 0))), Sequence(MovieUtil.getScaleIntervals(cans, durSlip/2, Point3(0.25, 0.25, 0.25), Point3(0.5, 0.5, 0.5)), MovieUtil.getScaleIntervals(cans, durSlip/2, Point3(0.5, 0.5, 0.5), Point3(0.25, 0.25, 0.25)), MovieUtil.getScaleIntervals(cans, dScale, Point3(0.25, 0.25, 0.25), MovieUtil.PNT3_NEARZERO), Func(MovieUtil.removeProps, cans))))
+
+    mtrack = Parallel(canOpenTrack, snakeTrack, Sequence(Parallel(Func(toon.pingpong, 'applause', fromFrame=28, toFrame=29), Func(toon.showAngryMuzzle), Func(toon.angryEyes), Func(toon.blinkEyes), throwCanTrack), Func(toon.normalEyes), Func(toon.blinkEyes), Wait(0.5), *__returnToBase(heal)), Sequence(Wait(dThrowWait), ActorInterval(target, 'conked'), Func(target.loop, 'neutral')), Sequence(Wait(dThrowWait), Func(__healToon, target, hp, ineffective, hasInteractivePropHealBonus)))
+    track.append(mtrack)
+    track.append(Func(target.clearChat))
+    return track
 
 def __healTickle(heal, hasInteractivePropHealBonus):
     toon = heal['toon']
