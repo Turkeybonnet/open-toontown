@@ -8,7 +8,7 @@ class DistributedSZTreasureAI(DistributedTreasureAI.DistributedTreasureAI):
         self.healAmount = treasurePlanner.healAmount
 
     def validAvatar(self, av, boss=None):
-        if av.treasureCount <= 30 and not boss: # We really only want to let them pick treasures up whenever not in a boss like CFO.
+        if av.treasureCount < 30 and not boss: # We really only want to let them pick treasures up whenever not in a boss like CFO.
             return True
         else:
             return av.hp >= -1 and av.hp < av.maxHp
